@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Music Player</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="music-player">
+        <h1>Music Player</h1>
+        <div id="current-track-info">
+            <p id="track-title">Track Title</p>
+            <p id="track-artist">Artist</p>
+        </div>
+
+        <audio id="audio-player" controls></audio>
+
+        <div class="controls">
+            <button id="prev-btn">⏮️</button>
+            <button id="play-pause-btn">▶️</button>
+            <button id="next-btn">⏭️</button>
+            <input type="range" id="progress-bar" min="0" value="0">
+        </div>
+
+        <div class="volume-control">
+            <label for="volume-slider">Volume: </label>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+        </div>
+
+        <div class="playlist">
+            <h2>Playlist</h2>
+            <ul id="playlist"></ul>
+        </div>
+
+        <div class="search">
+            <input type="text" id="search-bar" placeholder="Search songs...">
+        </div>
+    </div>
+
+    <script >
+        const audioPlayer = document.getElementById('audio-player');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const progressBar = document.getElementById('progress-bar');
+const volumeSlider = document.getElementById('volume-slider');
+const trackTitle = document.getElementById('track-title');
+const trackArtist = document.getElementById('track-artist');
+const playlistElement = document.getElementById('playlist');
+const searchBar = document.getElementById('search-bar');
+
+// Sample tracks
+const playlist = [
+    { title: 'Song 1', artist: 'Artist 1', src: 'c:\Users\swathi\Downloads\music.mpeg' },
+    { title: 'Song 2', artist: 'Artist 2', src: 'song2.mp3' },
+    { title: 'Song 3', artist: 'Artist 3', src: 'song3.mp3' }
+];
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+
+// Load playlist
+function loadPlaylist() {
+    playlistElement.innerHTML = '';
+    playlist.forEach((track, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${track.title} - ${track.artist}`;
+        li.addEventListener('click', () => playTrack(index));
+        playlistElement.appendChild(li);
+    });
+}
+
+// Load a track
+function loadTrack(index) {
+    const track = playlist[index];
+    audioPlayer.src = track.src;
+    trackTitle.textContent = track.title;
+    trackArtist.textContent = track.artist;
+    progressBar.value = 0;
+}
+
+// Play/Pause track
+function togglePlayPause() {
+    if (isPlaying) {
+        audioPlayer.pause();
+        playPauseBtn.textContent = '▶️';
+    } else {
+        audioPlayer.play();
+        playPauseBtn.textContent = '⏸️';
+    }
+    isPlaying = !isPlaying;
+}
+
+// Play the next track
+function playNextTrack() {
+    currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+    loadTrack(currentTrackIndex);
+    audioPlayer.play();
+    isPlaying = true;
+    playPauseBtn.textContent = '⏸️';
+}
+
+// Play the previous track
+function playPrevTrack() {
+    currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+    loadTrack(currentTrackIndex);
+    audioPlayer.play();
+    isPlaying = true;
+    playPauseBtn.textContent = '⏸️';
+}
+
+// Update progress bar as the track plays
+audioPlayer.addEventListener('timeupdate', () => {
+    progressBar.value = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+});
+
+// Skip to a specific point in the track
+progressBar.addEventListener('input', () => {
+    const seekTime = (progressBar.value / 100) * audioPlayer.duration;
+    audioPlayer.currentTime = seekTime;
+});
+
+// Adjust volume
+volumeSlider.addEventListener('input', () => {
+    audioPlayer.volume = volumeSlider.value;
+});
+
+// Search for a song in the playlist
+searchBar.addEventListener('input', () => {
+    const query = searchBar.value.toLowerCase();
+    const filteredTracks = playlist.filter(track => track.title.toLowerCase().includes(query));
+    playlistElement.innerHTML = '';
+    filteredTracks.forEach((track, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${track.title} - ${track.artist}`;
+        li.addEventListener('click', () => playTrack(index));
+        playlistElement.appendChild(li);
+    });
+});
+
+// Initialize player
+function playTrack(index) {
+    currentTrackIndex = index;
+    loadTrack(currentTrackIndex);
+    togglePlayPause();
+}
+
+loadPlaylist();
+loadTrack(currentTrackIndex);
+
+playPauseBtn.addEventListener('click', togglePlayPause);
+nextBtn.addEventListener('click', playNextTrack);
+prevBtn.addEventListener('click', playPrevTrack);
+
+    </script>
+</body>
+</html>
